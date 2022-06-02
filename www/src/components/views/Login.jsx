@@ -31,7 +31,6 @@ export default function Login() {
   const logInWithEmailAndPassword = async (email, password) => {
     try {
       const login = await signInWithEmailAndPassword(auth, email, password)
-      console.log('login', login)
     } catch (err) {
       let errorMessage = ''
 
