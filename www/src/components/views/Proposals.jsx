@@ -1,7 +1,5 @@
 import React from 'react'
-import { useAuthState } from 'react-firebase-hooks/auth'
 import { formatDate } from '../../utils/formatUtils'
-import { auth } from '../../lib/firebase'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
@@ -13,7 +11,13 @@ import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown'
 import Typography from '@mui/material/Typography'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 
-export default function Proposals({ proposals, onVoteUp, onVoteDown, user, onDelete }) {
+export default function Proposals({
+  proposals,
+  onVoteUp,
+  onVoteDown,
+  user,
+  onDelete,
+}) {
   return (
     <Container component='main' maxWidth='md'>
       <List dense={false}>
@@ -38,9 +42,17 @@ export default function Proposals({ proposals, onVoteUp, onVoteDown, user, onDel
                       color='primary'
                       aria-label='vote up'
                       component='span'
-                      onClick={() => onVoteUp(proposal.id)}
+                      onClick={() => onVoteUp(proposal)}
                     >
-                      <ArrowCircleUpIcon fontSize='large' color='success' />
+                      <ArrowCircleUpIcon
+                        fontSize='large'
+                        color={
+                          proposal.positiveVotes.includes(user.uid) ||
+                          proposal.negativeVotes.includes(user.uid)
+                            ? '#fff'
+                            : 'success'
+                        }
+                      />
                     </IconButton>
                   </Grid>
                   <Grid item>
@@ -49,7 +61,8 @@ export default function Proposals({ proposals, onVoteUp, onVoteDown, user, onDel
                       color='textSecondary'
                       fontWeight={600}
                     >
-                      {proposal.positiveVotes.length}
+                      {proposal.positiveVotes.length -
+                        proposal.negativeVotes.length}
                     </Typography>
                   </Grid>
                   <Grid item>
@@ -59,11 +72,19 @@ export default function Proposals({ proposals, onVoteUp, onVoteDown, user, onDel
                         proposal.negativeVotes.includes(user.uid)
                       }
                       color='primary'
-                      aria-label='vote up'
+                      aria-label='vote down'
                       component='span'
-                      onClick={() => onVoteDown(proposal.id)}
+                      onClick={() => onVoteDown(proposal)}
                     >
-                      <ArrowCircleDownIcon fontSize='large' color='error' />
+                      <ArrowCircleDownIcon
+                        fontSize='large'
+                        color={
+                          proposal.positiveVotes.includes(user.uid) ||
+                          proposal.negativeVotes.includes(user.uid)
+                            ? '#fff'
+                            : 'error'
+                        }
+                      />
                     </IconButton>
                   </Grid>
                 </Grid>

@@ -10,6 +10,7 @@ import {
   createProposal,
   deleteInitiative,
   deleteProposal,
+  updateRating,
 } from '../../data/models/initiativesModel'
 import { formatDate } from '../../utils/formatUtils'
 import Box from '@mui/material/Box'
@@ -52,8 +53,11 @@ export default function Initiatives() {
   const [order, setOrder] = useState(orderIndex[0])
   const navigate = useNavigate()
 
+  /**
+   * It gets the initiatives from the database and sets the state of the
+   * initiatives.
+   */
   const getInitiatives = async (order, orderBy) => {
-    console.log('getInitiatives')
     setLoadingInitiatives(true)
     const newInitiatives = await getInitiativesCollection(order, orderBy)
     setLoadingInitiatives(false)
@@ -65,7 +69,9 @@ export default function Initiatives() {
 
         if (change.type === 'added') {
           setNotification(`Initiative added by ${change.doc.data().userName}`)
-          showNotification && initiatives.length > 0 && setOpenNotification(true)
+          showNotification &&
+            initiatives.length > 0 &&
+            setOpenNotification(true)
         }
 
         if (change.type === 'removed') {
@@ -81,6 +87,9 @@ export default function Initiatives() {
     })
   }
 
+  /**
+   * It gets the proposals from the database and sets the state of the proposals.
+   */
   const getProposals = async () => {
     setLoadingProposals(true)
     const newProposals = await getProposalsCollection()
@@ -92,16 +101,18 @@ export default function Initiatives() {
           user && change.doc.id && change.doc.data().uid !== user.uid
 
         if (change.type === 'added') {
+          setNotification(`Proposal added by ${change.doc.data().userName}`)
+          showNotification && setOpenNotification(true)
+        }
 
-            setNotification(`Proposal added by ${change.doc.data().userName}`)
-            showNotification && setOpenNotification(true)
-
+        if (change.type === 'modified') {
+          setNotification(`Proposal voted by ${change.doc.data().userName}`)
+          showNotification && setOpenNotification(true)
         }
 
         if (change.type === 'removed') {
-          setNotification(`Proposal added by ${change.doc.data().userName}`)
+          setNotification(`Proposal removed by ${change.doc.data().userName}`)
           showNotification && setOpenNotification(true)
-
         }
       })
       const proposalsSnapshot = []
@@ -112,7 +123,6 @@ export default function Initiatives() {
     })
   }
 
-  // componentDidMount
   useEffect(() => {
     if (!user) return navigate('/')
     initiatives.length === 0 && getInitiatives(order, orderBy)
@@ -129,14 +139,26 @@ export default function Initiatives() {
     }
   }, [user])
 
+  /**
+   * When the user clicks the button, the function sets the state of the
+   * openCreateInitiative variable to true
+   */
   const handleOpenCreateInitiative = () => {
     setOpenCreateInitiative(true)
   }
 
+  /**
+   * It sets the state of the openCreateInitiative to false
+   */
   const handleCloseCreate = () => {
     setOpenCreateInitiative(false)
   }
 
+  /**
+   * It creates a new initiative object, sets the loading state to true, creates
+   * the initiative, sets the loading state to false, and closes the create
+   * initiative modal
+   */
   const handleCreateInitiative = async (title) => {
     const newInitiative = {
       createAt: new Date(),
@@ -151,15 +173,27 @@ export default function Initiatives() {
     setOpenCreateInitiative(false)
   }
 
+  /**
+   * It sets the current initiative to the initiative that was clicked on, and then
+   * sets the state of the modal to open
+   */
   const handleOpenCreateProposal = (initiative) => {
     setCurrentInitiative(initiative)
     setOpenCreateProposal(true)
   }
 
+  /**
+   * It sets the state of the openCreateProposal variable to false
+   */
   const handleCloseCreateProposal = () => {
     setOpenCreateProposal(false)
   }
 
+  /**
+   * It creates a new proposal object, then calls the createProposal function,
+   * which is a function that uses the firebase API to create a new proposal in the
+   * database
+   */
   const handleCreateProposal = async (proposal) => {
     const newProposal = {
       createAt: new Date(),
@@ -181,23 +215,39 @@ export default function Initiatives() {
     setOpenCreateProposal(false)
   }
 
-  const handleVoteUp = (id) => {
-    console.log('handleVoteUp', id)
+  /**
+   * It updates the rating of a proposal.
+   */
+  const handleVoteUp = (proposal) => {
+    updateRating(proposal, 'up', user.uid)
   }
 
-  const handleVoteDown = (id) => {
-    console.log('handleVoteDown', id)
+  /**
+   * It takes a proposal object as an argument, and then calls the updateRating
+   * function, passing in the proposal, the string 'down', and the user's uid
+   */
+  const handleVoteDown = (proposal) => {
+    updateRating(proposal, 'down', user.uid)
   }
 
+  /**
+   * It sets the state of the openNotification variable to false
+   */
   const handleCloseNotification = () => {
     setOpenNotification(false)
   }
 
+  /**
+   * It deletes an initiative.
+   */
   const handleDeleteInitiative = async (id) => {
-    console.log('handleDeleteInitiative', id)
     await deleteInitiative(id, proposals)
   }
 
+  /**
+   * It's a function that takes a proposal as an argument and then calls the
+   * deleteProposal function with that proposal as an argument
+   */
   const handleDeleteProposal = async (proposal) => {
     await deleteProposal(proposal)
   }
@@ -216,7 +266,7 @@ export default function Initiatives() {
           >
             Initiatives
           </Typography>
-          <Grid container spacing={2}>
+          <Grid container spacing={2} mb={4}>
             <Grid item xs={6}>
               <Button
                 onClick={handleOpenCreateInitiative}
@@ -240,7 +290,18 @@ export default function Initiatives() {
                 <Grid container spacing={2}>
                   <Grid item xs={1}>
                     <Avatar sx={{ bgcolor: '#5a5858' }}>
-                      {initiative.rating}
+                      {proposals
+                        .filter((x) => x.initiativeId === initiative.id)
+                        .reduce(
+                          (acc, cur) => acc + cur.positiveVotes.length,
+                          0,
+                        ) -
+                        proposals
+                          .filter((x) => x.initiativeId === initiative.id)
+                          .reduce(
+                            (acc, cur) => acc + cur.negativeVotes.length,
+                            0,
+                          )}
                     </Avatar>
                   </Grid>
                   <Grid item xs={10}>

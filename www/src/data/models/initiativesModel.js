@@ -1,4 +1,13 @@
-import { query, collection, getDocs, addDoc, orderBy, deleteDoc, doc } from 'firebase/firestore'
+import {
+  query,
+  collection,
+  getDocs,
+  addDoc,
+  orderBy,
+  deleteDoc,
+  doc,
+  updateDoc,
+} from 'firebase/firestore'
 import { db } from '../../lib/firebase'
 
 /**
@@ -15,7 +24,7 @@ export const getInitiativesCollection = async (property, order) => {
     id: doc.id,
     ...doc.data(),
   }))
-  return { q: q ,data: data }
+  return { q: q, data: data }
 }
 
 /**
@@ -31,7 +40,7 @@ export const getProposalsCollection = async () => {
     ...doc.data(),
   }))
 
-  return { q: q ,data: data }
+  return { q: q, data: data }
 }
 
 /**
@@ -41,18 +50,44 @@ export const getProposalsCollection = async () => {
  */
 export const deleteInitiative = async (id, proposals) => {
   console.log('deleteInitiative', id, proposals)
-  await deleteDoc(doc(db, 'initiatives', id));
+  await deleteDoc(doc(db, 'initiatives', id))
   proposals.forEach(async (proposal) => {
     if (proposal.initiativeId === id) {
-    await deleteDoc(doc(db, 'proposals', proposal.id))
+      await deleteDoc(doc(db, 'proposals', proposal.id))
     }
   })
 }
 
+/**
+ * It deletes a proposal from the database
+ * @param proposal - The proposal object that you want to delete.
+ */
 export const deleteProposal = async (proposal) => {
   await deleteDoc(doc(db, 'proposals', proposal.id))
 }
 
+/**
+ * It updates the proposal document with the user's vote
+ * @param proposal - The proposal object that we're updating
+ * @param rating - 'up' or 'down'
+ * @param userId - The user's ID
+ */
+export const updateRating = async (proposal, rating, userId) => {
+  const proposalRef = doc(db, 'proposals', proposal.id)
+  const data = {
+    ...proposal,
+  }
+
+  if (rating === 'up') {
+    await updateDoc(proposalRef, {
+      positiveVotes: [...proposal.positiveVotes, userId],
+    })
+  } else {
+    await updateDoc(proposalRef, {
+      negativeVotes: [...proposal.negativeVotes, userId],
+    })
+  }
+}
 
 /**
  * It creates a new initiative in the database
@@ -74,7 +109,6 @@ export const createInitiative = async ({
   })
   return res
 }
-
 
 /**
  * It creates a new proposal in the database
