@@ -131,16 +131,6 @@ export default function Login() {
             Login with Google
           </Button>
 
-          <Button
-            fullWidth
-            variant='contained'
-            style={{ backgroundColor: '#000' }}
-            sx={{ mt: 1, mb: 1 }}
-            onClick={handleSignInWithGitHub}
-          >
-            Login with Github
-          </Button>
-
           {loading && (
             <div>
               <p>Initialising User...</p>
