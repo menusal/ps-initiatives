@@ -1,4 +1,4 @@
-import { query, collection, getDocs, addDoc, orderBy } from 'firebase/firestore'
+import { query, collection, getDocs, addDoc, orderBy, deleteDoc, doc } from 'firebase/firestore'
 import { db } from '../../lib/firebase'
 
 /**
@@ -15,17 +15,13 @@ export const getInitiativesCollection = async (property, order) => {
     id: doc.id,
     ...doc.data(),
   }))
-
-  return data
+  return { q: q ,data: data }
 }
 
 /**
  * It queries the proposals collection, orders the results by the createAt field in
  * descending order, and returns the results as an array of objects
- *
- * Returns
- * -------
- * 	An array of objects.
+ * @returns An array of objects.
  */
 export const getProposalsCollection = async () => {
   const q = query(collection(db, 'proposals'), orderBy('createAt', 'desc'))
@@ -35,15 +31,32 @@ export const getProposalsCollection = async () => {
     ...doc.data(),
   }))
 
-  return data
+  return { q: q ,data: data }
 }
 
 /**
+ * It deletes an initiative and all of its proposals
+ * @param initiative - the initiative object that you want to delete
+ * @param proposals - an array of all proposals in the database
+ */
+export const deleteInitiative = async (id, proposals) => {
+  console.log('deleteInitiative', id, proposals)
+  await deleteDoc(doc(db, 'initiatives', id));
+  proposals.forEach(async (proposal) => {
+    if (proposal.initiativeId === id) {
+    await deleteDoc(doc(db, 'proposals', proposal.id))
+    }
+  })
+}
+
+export const deleteProposal = async (proposal) => {
+  await deleteDoc(doc(db, 'proposals', proposal.id))
+}
+
+
+/**
  * It creates a new initiative in the database
- *
- * Returns
- * -------
- * 	The response from the database.
+ * @returns The response from the database.
  */
 export const createInitiative = async ({
   createAt,
@@ -62,12 +75,10 @@ export const createInitiative = async ({
   return res
 }
 
+
 /**
  * It creates a new proposal in the database
- *
- * Returns
- * -------
- * 	The id of the newly created document.
+ * @returns The id of the newly created document.
  */
 export const createProposal = async ({
   createAt,

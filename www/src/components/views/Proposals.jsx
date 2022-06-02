@@ -11,10 +11,9 @@ import IconButton from '@mui/material/IconButton'
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp'
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown'
 import Typography from '@mui/material/Typography'
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 
-export default function Proposals({ proposals, onVoteUp, onVoteDown }) {
-  const [user] = useAuthState(auth)
-
+export default function Proposals({ proposals, onVoteUp, onVoteDown, user, onDelete }) {
   return (
     <Container component='main' maxWidth='md'>
       <List dense={false}>
@@ -88,6 +87,16 @@ export default function Proposals({ proposals, onVoteUp, onVoteDown }) {
                     proposal.negativeVotes.length
                   }`}
                 </Typography>
+                {user && proposal.uid === user.uid && (
+                  <IconButton
+                    color='secondary'
+                    aria-label='upload picture'
+                    component='span'
+                    onClick={() => onDelete(proposal)}
+                  >
+                    <DeleteForeverIcon />
+                  </IconButton>
+                )}
               </Grid>
             </Grid>
           </div>

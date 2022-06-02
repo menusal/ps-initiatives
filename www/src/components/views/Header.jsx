@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { auth, logout } from '../../lib/firebase'
+import { useNavigate } from 'react-router-dom'
 import AppBar from '@mui/material/AppBar'
 import Toolbar from '@mui/material/Toolbar'
 import IconButton from '@mui/material/IconButton'
@@ -10,7 +11,7 @@ import Menu from '@mui/material/Menu'
 import { ReactComponent as Logo } from '../../assets/logo.svg'
 
 export default function Header({ name }) {
-
+  const navigate = useNavigate()
   const [anchorEl, setAnchorEl] = useState(null)
 
   const handleChange = (event) => {}
@@ -21,6 +22,11 @@ export default function Header({ name }) {
 
   const handleClose = () => {
     setAnchorEl(null)
+  }
+
+  const handleLogout = () => {
+    logout()
+    navigate('/')
   }
 
   return (
@@ -73,7 +79,7 @@ export default function Header({ name }) {
               open={Boolean(anchorEl)}
               onClose={handleClose}
             >
-              <MenuItem onClick={logout}>Logout</MenuItem>
+              <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
           </div>
         )}
