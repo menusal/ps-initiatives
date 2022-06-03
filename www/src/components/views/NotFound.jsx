@@ -43,7 +43,7 @@ export default function NotFound() {
         </Grid>
         <Grid item>
           <Typography variant='body1'>
-            The page you’re looking for doesn’t exist.
+            The page you’re looking for doesn’t exist...
             <br />
             Use Location Intelligence to find your way home.
           </Typography>
