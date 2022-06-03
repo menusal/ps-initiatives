@@ -45,7 +45,7 @@ export default function NotFound() {
           <Typography variant='body1'>
             The page you’re looking for doesn’t exist...
             <br />
-            Use Location Intelligence to find your way home.
+            Use the button below to find your way home.
           </Typography>
         </Grid>
         <Grid
