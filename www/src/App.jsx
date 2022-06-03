@@ -6,6 +6,7 @@ import {
 import Login from './components/views/Login'
 import Initiatives from './components/views/Initiatives'
 import NotFound from './components/views/NotFound'
+import "./App.css"
 function App() {
   return (
     <div>

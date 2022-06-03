@@ -1,20 +1,18 @@
-
-import Button from '@mui/material/Button'
-import Container from '@mui/material/Container'
-import Grid from '@mui/material/Grid'
-import Link from '@mui/material/Link'
-import { Typography } from '@mui/material'
+import { Typography, Button, Container, Grid, Link } from '@mui/material'
 import { NavLink } from 'react-router-dom'
-import background404 from '@/assets/404.svg'
+import background404 from '@/assets/arana.webp'
 
 export default function NotFound() {
-
   return (
     <Container
       style={{
         flex: '1 1 auto',
         display: 'flex',
-        paddingTop: '25%',
+        backgroundImage: `url("${background404}")`,
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        backgroundSize: 'cover',
+        height: '100vh',
       }}
     >
       <Grid
@@ -22,37 +20,36 @@ export default function NotFound() {
         direction='column'
         spacing={2}
         justifyContent='center'
-        alignContent='space-between'
-        style={{
-          backgroundImage: `url("${background404}")`,
-          backgroundPosition: 'bottom',
-          backgroundRepeat: 'no-repeat',
-          backgroundSize: 'contain',
-          height: '100%',
-        }}
+        alignContent='center'
       >
         <Grid item>
-          <Typography variant='h1'>Error 404</Typography>
-        </Grid>
-        <Grid item>
-          <Typography variant='h3'>
-            Whoops!
-            <br />
-            You’re lost at sea
+          <Typography
+            variant='h1'
+            style={{
+              fontSize: '362px',
+              textShadow:
+                '10px 0 0 #000, -10px 0 0 #000, 0 10px 0 #000, 0 -10px 0 #000, 10px 10px #000, -10px -10px 0 #000, 10px -10px 0 #000, -10px 10px 0 #000',
+            }}
+            color='#FFF'
+          >
+            404
           </Typography>
         </Grid>
         <Grid item>
-          <Typography variant='body1'>
-            The page you’re looking for doesn’t exist...
-            <br />
-            Use the button below to find your way home.
+          <Typography
+            variant='h2'
+            style={{
+              textShadow:
+                '3px 0 0 #000, -3px 0 0 #000, 0 3px 0 #000, 0 -3px 0 #000, 3px 3px #000, -3px -3px 0 #000, 3px -3px 0 #000, -3px 3px 0 #000',
+            }}
+            color='#FFF'
+          >
+            You are trapped
           </Typography>
         </Grid>
+
         <Grid
           item
-          style={{
-            marginTop: '24px',
-          }}
         >
           <Link to='/' component={NavLink} underline='none'>
             <Button variant='contained' color='primary' size='large'>

@@ -1,12 +1,16 @@
-import React, { useState } from 'react'
-import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import DialogTitle from '@mui/material/DialogTitle'
-import CircularProgress from '@mui/material/CircularProgress'
+import React, { useState, useEffect } from 'react'
+import {
+  Alert,
+  AlertTitle,
+  Button,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  CircularProgress,
+} from '@mui/material'
 
 export default function ModalCreateInitiative({
   open,
@@ -15,6 +19,22 @@ export default function ModalCreateInitiative({
   loading,
 }) {
   const [title, setTitle] = useState('')
+  const [bacon, setBacon] = useState('')
+
+  const getBacon = async () => {
+    const res = await fetch(
+      'https://us-central1-ps-initiatives.cloudfunctions.net/getBacon',
+    )
+    const json = await res.json()
+    setBacon(json.result)
+  }
+
+  useEffect(() => {
+    if (open)
+      getBacon()
+    else
+      setBacon('')
+  }, [open])
 
   const handleCreate = () => {
     onCreate(title)
@@ -26,9 +46,14 @@ export default function ModalCreateInitiative({
       <Dialog open={open} fullWidth={true}>
         <DialogTitle>New Initiative</DialogTitle>
         <DialogContent>
+          <Alert severity='info'>
+            <AlertTitle>Looking for inspiration?</AlertTitle>
+            {bacon !== '' ? bacon : <CircularProgress />}
+          </Alert>
           <DialogContentText>
             Please, be descriptive about your initiative.
           </DialogContentText>
+
           <TextField
             autoFocus
             multiline
