@@ -68,14 +68,18 @@ export default function Initiatives() {
           user && change.doc.id && change.doc.data().uid !== user.uid
 
         if (change.type === 'added') {
-          setNotification(`Initiative added by ${change.doc.data().userName}`)
+          setNotification(
+            `Initiative added by ${change.doc.data().userName || 'Guest'}`,
+          )
           showNotification &&
             initiatives.length > 0 &&
             setOpenNotification(true)
         }
 
         if (change.type === 'removed') {
-          setNotification(`Initiative removed by ${change.doc.data().userName}`)
+          setNotification(
+            `Initiative removed by ${change.doc.data().userName || 'Guest'}`,
+          )
           showNotification && setOpenNotification(true)
         }
       })
@@ -101,17 +105,28 @@ export default function Initiatives() {
           user && change.doc.id && change.doc.data().uid !== user.uid
 
         if (change.type === 'added') {
-          setNotification(`Proposal added by ${change.doc.data().userName}`)
+          setNotification(
+            `Proposal added by ${change.doc.data().userName || 'Guest'}`,
+          )
           showNotification && setOpenNotification(true)
         }
 
         if (change.type === 'modified') {
-          setNotification(`Proposal voted by ${change.doc.data().userName}`)
-          showNotification && setOpenNotification(true)
+          const initiative = initiatives.find(
+            (x) => x.id === change.doc.data().initiativeId,
+          )
+          if (initiative) {
+            setNotification(
+              `Proposal in "${initiative.title}" initiative voted`,
+            )
+            showNotification && setOpenNotification(true)
+          }
         }
 
         if (change.type === 'removed') {
-          setNotification(`Proposal removed by ${change.doc.data().userName}`)
+          setNotification(
+            `Proposal removed by ${change.doc.data().userName || 'Guest'}`,
+          )
           showNotification && setOpenNotification(true)
         }
       })
