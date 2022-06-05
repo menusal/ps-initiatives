@@ -25,6 +25,7 @@ import LinearProgress from '@mui/material/LinearProgress'
 import Avatar from '@mui/material/Avatar'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
+import Alert from '@mui/material/Alert'
 import Proposals from './Proposals'
 import Header from './Header'
 import ModalCreateInitiative from './ModalCreateInitiative'
@@ -38,6 +39,7 @@ let unsubscribeInitiatives = null
 export default function Initiatives() {
   const [user] = useAuthState(auth)
   const [name, setName] = useState('')
+  const [error, setError] = useState('')
   const [proposals] = useState([])
   const [initiatives, setInitiatives] = useState([])
   const [currentInitiative, setCurrentInitiative] = useState(null)
@@ -62,6 +64,11 @@ export default function Initiatives() {
     const newInitiatives = await getInitiativesCollection(order, orderBy)
     setLoadingInitiatives(false)
 
+    if (!newInitiatives.data) {
+      setError(newInitiatives.message)
+      setLoadingInitiatives(false)
+      return
+    }
     unsubscribeInitiatives = onSnapshot(newInitiatives.q, (snapshot) => {
       snapshot.docChanges().forEach((change) => {
         const showNotification =
@@ -139,7 +146,12 @@ export default function Initiatives() {
       rating: 0,
     }
     setLoadingInitiatives(true)
-    await createInitiative(newInitiative)
+    const res = await createInitiative(newInitiative)
+    if (!res.id) {
+      setError(res.message)
+      setLoadingInitiatives(false)
+      return
+    }
     setLoadingInitiatives(false)
     setOpenCreateInitiative(false)
   }
@@ -234,6 +246,7 @@ export default function Initiatives() {
           >
             Initiatives
           </Typography>
+          {error !== '' && <Alert severity='error'>{error}</Alert>}
           <Grid container spacing={2} mb={4}>
             <Grid item xs={6}>
               <Button
@@ -340,15 +353,23 @@ export default function Initiatives() {
 }
 
 const getPositiveVotes = (initiative) => {
-  return initiative.proposals && initiative.proposals.reduce(
-    (acc, cur) => acc + cur.positiveVotes.length,
-    0,
-  ) || 0
+  return (
+    (initiative.proposals &&
+      initiative.proposals.reduce(
+        (acc, cur) => acc + cur.positiveVotes.length,
+        0,
+      )) ||
+    0
+  )
 }
 
 const getNegativeVotes = (initiative) => {
-  return initiative.proposals && initiative.proposals.reduce(
-    (acc, cur) => acc + cur.negativeVotes.length,
-    0,
-  ) || 0
+  return (
+    (initiative.proposals &&
+      initiative.proposals.reduce(
+        (acc, cur) => acc + cur.negativeVotes.length,
+        0,
+      )) ||
+    0
+  )
 }

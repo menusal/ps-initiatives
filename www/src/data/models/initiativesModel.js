@@ -17,28 +17,33 @@ import * as short from 'short-uuid'
  * A function that it creates a new initiative in the firestore database
  * @returns The response from the firestore database.
  */
- export const createInitiative = async ({
+export const createInitiative = async ({
   createAt,
   title,
   uid,
   userName,
   rating,
 }) => {
-  const res = await addDoc(collection(db, 'initiatives'), {
-    createAt,
-    title,
-    uid,
-    userName,
-    rating,
-  })
-  return res
+  try {
+    const res = await addDoc(collection(db, 'initiatives'), {
+      createAt,
+      title,
+      uid,
+      userName,
+      rating,
+    })
+    return res
+  } catch (error) {
+    console.log(error)
+    return error
+  }
 }
 
 /**
  * A function that it creates a new proposal in the firestore database
  * @returns The id of the newly created document.
  */
- export const createProposal = async ({
+export const createProposal = async ({
   createAt,
   updateAt,
   initiativeId,
@@ -75,12 +80,16 @@ import * as short from 'short-uuid'
  */
 export const getInitiativesCollection = async (property, order) => {
   const q = query(collection(db, 'initiatives'), orderBy(property, order))
-  const querySnapshot = await getDocs(q)
-  const data = querySnapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }))
-  return { q: q, data: data }
+  try {
+    const querySnapshot = await getDocs(q)
+    const data = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }))
+    return { q: q, data: data }
+  } catch (error) {
+    return error
+  }
 }
 
 /**
@@ -91,7 +100,12 @@ export const getInitiativesCollection = async (property, order) => {
  * @param userId - The user's ID
  * @param initiativeId - the id of the initiative
  */
- export const updateRating = async (currentProposal, rating, userId, initiativeId) => {
+export const updateRating = async (
+  currentProposal,
+  rating,
+  userId,
+  initiativeId,
+) => {
   const initiativeRef = doc(db, 'initiatives', initiativeId)
   const docSnap = await getDoc(initiativeRef)
   const proposals = docSnap.data().proposals.map((proposal) => {
@@ -128,7 +142,6 @@ export const deleteInitiative = async (id, proposals) => {
   })
 }
 
-
 /**
  * A function that it deletes a proposal from an initiative
  * @param proposalToDelete - The proposal object that you want to delete.
@@ -137,7 +150,9 @@ export const deleteInitiative = async (id, proposals) => {
 export const deleteProposal = async (proposalToDelete, initiativeId) => {
   const initiativeRef = doc(db, 'initiatives', initiativeId)
   const docSnap = await getDoc(initiativeRef)
-  const proposals = docSnap.data().proposals.filter((proposal) => proposal.id !== proposalToDelete.id)
+  const proposals = docSnap
+    .data()
+    .proposals.filter((proposal) => proposal.id !== proposalToDelete.id)
 
   await updateDoc(initiativeRef, { proposals: proposals })
 }
