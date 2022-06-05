@@ -14,8 +14,6 @@ export default function Header({ name }) {
   const navigate = useNavigate()
   const [anchorEl, setAnchorEl] = useState(null)
 
-  const handleChange = (event) => {}
-
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget)
   }

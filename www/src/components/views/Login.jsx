@@ -21,13 +21,11 @@ export default function Login() {
   const [email, setEmail] = useState('')
   // const [loading, setLoading] = useState(false)
   const [password, setPassword] = useState('')
-  const [user, loading, setLoadng] = useAuthState(auth)
+  const [user, loading] = useAuthState(auth)
   const [error, setError] = useState(null)
   const navigate = useNavigate()
 
   useEffect(() => {
-    if (user) {
-    }
     user && setTimeout(() => navigate('/initiatives'), 0)
   }, [user])
 

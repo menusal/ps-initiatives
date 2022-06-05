@@ -12,6 +12,7 @@ import Typography from '@mui/material/Typography'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 
 export default function Proposals({
+  initiative,
   proposals,
   onVoteUp,
   onVoteDown,
@@ -42,7 +43,7 @@ export default function Proposals({
                       color='primary'
                       aria-label='vote up'
                       component='span'
-                      onClick={() => onVoteUp(proposal)}
+                      onClick={() => onVoteUp(proposal, initiative)}
                     >
                       <ArrowCircleUpIcon
                         fontSize='large'
@@ -74,7 +75,7 @@ export default function Proposals({
                       color='primary'
                       aria-label='vote down'
                       component='span'
-                      onClick={() => onVoteDown(proposal)}
+                      onClick={() => onVoteDown(proposal, initiative)}
                     >
                       <ArrowCircleDownIcon
                         fontSize='large'
@@ -113,7 +114,7 @@ export default function Proposals({
                     color='secondary'
                     aria-label='upload picture'
                     component='span'
-                    onClick={() => onDelete(proposal)}
+                    onClick={() => onDelete(proposal, initiative)}
                   >
                     <DeleteForeverIcon />
                   </IconButton>

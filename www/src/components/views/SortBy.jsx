@@ -4,11 +4,9 @@ import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
-import Typography from '@mui/material/Typography'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Grid from '@mui/material/Grid'
-import { useAuthState } from 'react-firebase-hooks/auth'
 
 const options = ['Title', 'Date created', 'Rating']
 

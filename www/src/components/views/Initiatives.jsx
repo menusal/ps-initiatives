@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState } from 'react'
 import { onSnapshot } from 'firebase/firestore'
 import { useAuthState } from 'react-firebase-hooks/auth'
 import { useNavigate } from 'react-router-dom'
 import { auth } from '../../lib/firebase'
 import {
   getInitiativesCollection,
-  getProposalsCollection,
   createInitiative,
   createProposal,
   deleteInitiative,
@@ -35,12 +34,11 @@ import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 
 const orderIndex = ['title', 'createAt', 'rating']
 let unsubscribeInitiatives = null
-let unsubscribeProposals = null
 
 export default function Initiatives() {
-  const [user, loading, error] = useAuthState(auth)
+  const [user] = useAuthState(auth)
   const [name, setName] = useState('')
-  const [proposals, setProposals] = useState([])
+  const [proposals] = useState([])
   const [initiatives, setInitiatives] = useState([])
   const [currentInitiative, setCurrentInitiative] = useState(null)
   const [openNotification, setOpenNotification] = useState(false)
@@ -49,7 +47,9 @@ export default function Initiatives() {
   const [openCreateProposal, setOpenCreateProposal] = useState(false)
   const [loadingInitiatives, setLoadingInitiatives] = useState(false)
   const [loadingProposals, setLoadingProposals] = useState(false)
+  // eslint-disable-next-line no-unused-vars
   const [orderBy, setOrderBy] = useState('asc')
+  // eslint-disable-next-line no-unused-vars
   const [order, setOrder] = useState(orderIndex[0])
   const navigate = useNavigate()
 
@@ -76,6 +76,11 @@ export default function Initiatives() {
             setOpenNotification(true)
         }
 
+        if (change.type === 'modified') {
+          setNotification(`Initiative "${change.doc.data().title}" has changed`)
+          showNotification && setOpenNotification(true)
+        }
+
         if (change.type === 'removed') {
           setNotification(
             `Initiative removed by ${change.doc.data().userName || 'Guest'}`,
@@ -91,60 +96,11 @@ export default function Initiatives() {
     })
   }
 
-  /**
-   * It gets the proposals from the database and sets the state of the proposals.
-   */
-  const getProposals = async () => {
-    setLoadingProposals(true)
-    const newProposals = await getProposalsCollection()
-    setLoadingProposals(false)
-
-    unsubscribeProposals = onSnapshot(newProposals.q, (snapshot) => {
-      snapshot.docChanges().forEach((change) => {
-        const showNotification =
-          user && change.doc.id && change.doc.data().uid !== user.uid
-
-        if (change.type === 'added') {
-          setNotification(
-            `Proposal added by ${change.doc.data().userName || 'Guest'}`,
-          )
-          showNotification && setOpenNotification(true)
-        }
-
-        if (change.type === 'modified') {
-          const initiative = initiatives.find(
-            (x) => x.id === change.doc.data().initiativeId,
-          )
-          if (initiative) {
-            setNotification(
-              `Proposal in "${initiative.title}" initiative voted`,
-            )
-            showNotification && setOpenNotification(true)
-          }
-        }
-
-        if (change.type === 'removed') {
-          setNotification(
-            `Proposal removed by ${change.doc.data().userName || 'Guest'}`,
-          )
-          showNotification && setOpenNotification(true)
-        }
-      })
-      const proposalsSnapshot = []
-      snapshot.docs.forEach((doc) => {
-        proposalsSnapshot.push({ ...doc.data(), id: doc.id })
-      })
-      setProposals(proposalsSnapshot)
-    })
-  }
-
   useEffect(() => {
     if (!user) return navigate('/')
     initiatives.length === 0 && getInitiatives(order, orderBy)
-    getProposals()
     return () => {
       typeof unsubscribeInitiatives === 'function' && unsubscribeInitiatives()
-      typeof unsubscribeProposals === 'function' && unsubscribeProposals()
     }
   }, [])
 
@@ -221,28 +177,25 @@ export default function Initiatives() {
       userName: user.displayName,
     }
 
-    console.log('newProposal', newProposal)
-
     setLoadingProposals(true)
     await createProposal(newProposal)
     setLoadingProposals(false)
-    getProposals()
     setOpenCreateProposal(false)
   }
 
   /**
    * It updates the rating of a proposal.
    */
-  const handleVoteUp = (proposal) => {
-    updateRating(proposal, 'up', user.uid)
+  const handleVoteUp = (proposal, initiative) => {
+    updateRating(proposal, 'up', user.uid, initiative.id)
   }
 
   /**
    * It takes a proposal object as an argument, and then calls the updateRating
    * function, passing in the proposal, the string 'down', and the user's uid
    */
-  const handleVoteDown = (proposal) => {
-    updateRating(proposal, 'down', user.uid)
+  const handleVoteDown = (proposal, initiative) => {
+    updateRating(proposal, 'down', user.uid, initiative.id)
   }
 
   /**
@@ -263,8 +216,8 @@ export default function Initiatives() {
    * It's a function that takes a proposal as an argument and then calls the
    * deleteProposal function with that proposal as an argument
    */
-  const handleDeleteProposal = async (proposal) => {
-    await deleteProposal(proposal)
+  const handleDeleteProposal = async (proposal, initiative) => {
+    await deleteProposal(proposal, initiative.id)
   }
 
   return (
@@ -305,18 +258,8 @@ export default function Initiatives() {
                 <Grid container spacing={2}>
                   <Grid item xs={1}>
                     <Avatar sx={{ bgcolor: '#5a5858' }}>
-                      {proposals
-                        .filter((x) => x.initiativeId === initiative.id)
-                        .reduce(
-                          (acc, cur) => acc + cur.positiveVotes.length,
-                          0,
-                        ) -
-                        proposals
-                          .filter((x) => x.initiativeId === initiative.id)
-                          .reduce(
-                            (acc, cur) => acc + cur.negativeVotes.length,
-                            0,
-                          )}
+                      {getPositiveVotes(initiative) -
+                        getNegativeVotes(initiative)}
                     </Avatar>
                   </Grid>
                   <Grid item xs={10}>
@@ -354,19 +297,18 @@ export default function Initiatives() {
                     </Button>
                   </Grid>
                 </Grid>
-
-                {loadingProposals && <LinearProgress />}
-                {user && proposals.length > 0 && (
-                  <Proposals
-                    proposals={proposals.filter(
-                      (x) => x.initiativeId === initiative.id,
-                    )}
-                    onVoteUp={handleVoteUp}
-                    onVoteDown={handleVoteDown}
-                    user={user}
-                    onDelete={handleDeleteProposal}
-                  />
-                )}
+                {user &&
+                  initiative.proposals &&
+                  initiative.proposals.length > 0 && (
+                    <Proposals
+                      initiative={initiative}
+                      proposals={initiative.proposals}
+                      onVoteUp={handleVoteUp}
+                      onVoteDown={handleVoteDown}
+                      user={user}
+                      onDelete={handleDeleteProposal}
+                    />
+                  )}
               </AccordionDetails>
             </Accordion>
           ))}
@@ -394,5 +336,21 @@ export default function Initiatives() {
         title={notification}
       />
     </div>
+  )
+}
+
+const getPositiveVotes = (initiative) => {
+  console.log(initiative)
+  return initiative.proposals.reduce(
+    (acc, cur) => acc + cur.positiveVotes.length,
+    0,
+  )
+}
+
+const getNegativeVotes = (initiative) => {
+  console.log(initiative)
+  return initiative.proposals.reduce(
+    (acc, cur) => acc + cur.negativeVotes.length,
+    0,
   )
 }
