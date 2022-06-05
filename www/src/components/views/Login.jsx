@@ -25,14 +25,31 @@ export default function Login() {
   const [error, setError] = useState(null)
   const navigate = useNavigate()
 
+  const checkOrganization = async (user) => {
+    // check if user is valid from custom function
+    // http://localhost:5001/ps-initiatives/us-central1/addLog?type=login&uid=wEFXf9otBXffBUJWQ8sPpGZIyZ13&email=darlandis@csdsd.com.br
+    const valid = await fetch(
+      `https://us-central1-ps-initiatives.cloudfunctions.net/customAuth?type=signIn&uid=${user.uid}&email=${user.email}`,
+    )
+    const validResult = await valid.json()
+
+    if (!validResult.result) {
+      console.log('validResult', validResult)
+      setError(validResult.message)
+      return
+    }
+    setTimeout(() => navigate('/initiatives'), 0)
+  }
+
   useEffect(() => {
-    user && setTimeout(() => navigate('/initiatives'), 0)
+   if (user) {
+    checkOrganization(user)
+   }
   }, [user])
 
   const logInWithEmailAndPassword = async (email, password) => {
     try {
-      const login = await signInWithEmailAndPassword(auth, email, password)
-      console.log(login)
+      await signInWithEmailAndPassword(auth, email, password)
     } catch (err) {
       let errorMessage = ''
 

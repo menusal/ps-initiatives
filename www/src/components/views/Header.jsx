@@ -24,7 +24,7 @@ export default function Header({ name }) {
 
   const handleLogout = () => {
     logout()
-    navigate('/')
+    setTimeout(() => navigate('/'), 50)
   }
 
   return (
