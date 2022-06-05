@@ -76,7 +76,7 @@ export default function Initiatives() {
 
         if (change.type === 'added') {
           setNotification(
-            `Initiative added by ${change.doc.data().userName || 'Guest'}`,
+            `Initiative added`,
           )
           showNotification &&
             initiatives.length > 0 &&
@@ -90,7 +90,7 @@ export default function Initiatives() {
 
         if (change.type === 'removed') {
           setNotification(
-            `Initiative removed by ${change.doc.data().userName || 'Guest'}`,
+            `Initiative removed`,
           )
           showNotification && setOpenNotification(true)
         }
