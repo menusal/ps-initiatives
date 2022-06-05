@@ -341,16 +341,16 @@ export default function Initiatives() {
 
 const getPositiveVotes = (initiative) => {
   console.log(initiative)
-  return initiative.proposals.reduce(
+  return initiative.proposals && initiative.proposals.reduce(
     (acc, cur) => acc + cur.positiveVotes.length,
     0,
-  )
+  ) || 0
 }
 
 const getNegativeVotes = (initiative) => {
   console.log(initiative)
-  return initiative.proposals.reduce(
+  return initiative.proposals && initiative.proposals.reduce(
     (acc, cur) => acc + cur.negativeVotes.length,
     0,
-  )
+  ) || 0
 }
