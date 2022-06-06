@@ -36,17 +36,17 @@ exports.customAuth = functions.https.onRequest(async (req, res) => {
     }
 
     // Push the new message into Firestore using the Firebase Admin SDK.
-   await admin
-      .firestore()
-      .collection("authLog")
-      .add({
-        type: type,
-        uid: uid,
-        email,
-        date: new Date(),
-        result,
-        message,
-      });
+  //  await admin
+  //     .firestore()
+  //     .collection("authLog")
+  //     .add({
+  //       type: type,
+  //       uid: uid,
+  //       email,
+  //       date: new Date(),
+  //       result,
+  //       message,
+  //     });
     // Send back a message that we've successfully written the log
     res.json({ 
       message: message,

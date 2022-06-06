@@ -41,11 +41,13 @@ export default function Login() {
     setTimeout(() => navigate('/initiatives'), 0)
   }
 
-  useEffect(() => {
-   if (user) {
-    checkOrganization(user)
-   }
-  }, [user])
+  // Uncoment this to use the custom auth with Blaze plan,
+  // there are not available yet in Free plan
+  // useEffect(() => {
+  //  if (user) {
+  //   checkOrganization(user)
+  //  }
+  // }, [user])
 
   const logInWithEmailAndPassword = async (email, password) => {
     try {
